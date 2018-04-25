@@ -17,15 +17,21 @@ app.post('/todos', (req, res) => {
    
    todo.save()
       .then((doc) => {
-         res.json(doc);
+         res.send(doc);
+      }, (e) => {
+         res.status(400)
+            .send(e);
+      });
+});
+
+app.get('/todos', (req, res) => {
+   Todo.find()
+      .then((todos) => {
+         res.json({todos});
       }, (e) => {
          res.status(400)
             .json(e);
       });
-});
-
-app.post('/users', (req, res) => {
-
 });
 
 app.listen(PORT, () => {
