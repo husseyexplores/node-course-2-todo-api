@@ -24,6 +24,12 @@ app.post('/todos', (req, res) => {
       });
 });
 
+app.post('/users', (req, res) => {
+
+});
+
 app.listen(PORT, () => {
    console.log(`Todo REST API Server Started on port ${PORT}.`);
 })
+
+module.exports = {app};
