@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const User = mongoose.model('Usersas', {
+const User = mongoose.model('User', {
    user: {
       type: String,
       required: [true, 'Username can\'t be left empty.'],
