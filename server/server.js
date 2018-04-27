@@ -1,4 +1,5 @@
 require('./config/config');
+const configENV = require('./config/config').configENV;
 
 const _ = require('lodash');
 const express = require('express');
@@ -103,8 +104,31 @@ app.patch('/todos/:id', (req, res) => {
       });
 });
 
+// USERS ROUTES
+
+app.post('/users', (req, res) => {
+
+   var body = _.pick(req.body, ['email', 'password']);
+   const user = new User(body);
+
+  // User.findByToken        // User Model Method
+  // user.generateAuthToken  // user instance method
+
+   user.save()
+      .then(() => {
+         return user.generateAuthToken();
+      })
+      .then((token) => {
+         res.header('x-auth', token).send(user);
+      })
+      .catch((e) => {
+         res.status(400)
+            .send(e);
+      });
+});
+
 app.listen(PORT, () => {
-   console.log(`Todo REST API Server Started on port ${PORT}.`);
+   console.log(`Todo REST API Server Started in *${configENV}* environment on port ${PORT}.`);
 })
 
 module.exports = {app};
