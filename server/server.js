@@ -9,6 +9,7 @@ const {ObjectID} = require('mongodb');
 const {mongoose} = require('./db/mongoose');    // Same as => const mongoose = require('./db/mongoose').mongoose
 const {Todo} = require ('./models/todo');       // Same as => const Todo = require('./models/todo').Todo
 const {User} = require ('./models/user');       // Same as => const User = require('./models/user').User
+const {authenticate} = require('./middleware/authenticate');
 
 const app = express();
 const PORT = process.env.PORT;
@@ -126,6 +127,10 @@ app.post('/users', (req, res) => {
             .send(e);
       });
 });
+
+app.get('/users/me', authenticate,(req, res) => {
+   res.send(req.user);
+})
 
 app.listen(PORT, () => {
    console.log(`Todo REST API Server Started in *${configENV}* environment on port ${PORT}.`);
