@@ -82,13 +82,13 @@ app.delete('/todos/:id', (req, res) => {
 app.patch('/todos/:id', (req, res) => {
    const id = req.params.id;
 
-   var body = pick(req.body, ['text', 'completed']);
+   var body = _.pick(req.body, ['text', 'completed']);
    
    if (!ObjectID.isValid(id)) {
       return res.status(404).send();
    }
 
-   if (isBoolean(body.completed) && body.completed) {
+   if (_.isBoolean(body.completed) && body.completed) {
       body.completedAt = new Date().getTime();
    } else {
       body.completed = false;
@@ -110,7 +110,7 @@ app.patch('/todos/:id', (req, res) => {
 
 app.post('/users', (req, res) => {
 
-   var body = pick(req.body, ['email', 'password']);
+   var body = _.pick(req.body, ['email', 'password']);
    const user = new User(body);
 
   // User.findByToken        // User Model Method
