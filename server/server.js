@@ -170,8 +170,20 @@ app.post('/users/login', (req, res) => {
       })
 });
 
+app.delete('/users/me/token', authenticate, (req, res) => {
+   var token = req.token;
+   var user = req.user;
+
+   user.removeToken(token)
+      .then(() => {
+         res.status(200).send('Token Deleted');
+      }, () => {
+         res.status(400).send('Token NOT Deleted');
+      })
+})
+
 app.listen(PORT, () => {
    console.log(`Todo REST API Server Started in *${configENV}* environment on port ${PORT}.`);
-})
+});
 
 module.exports = { app };
