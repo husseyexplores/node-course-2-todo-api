@@ -1,20 +1,21 @@
 require('./config/config');
-const configENV = require('./config/config').configENV;
+const { configENV } = require('./config/config');
 
 const _ = require('lodash');
 const express = require('express');
-const bodyParser = require('body-parser');
-const {ObjectID} = require('mongodb');
+const { json } = require('body-parser');
+const { ObjectID } = require('mongodb');
+const bcrypt = require('bcryptjs');
 
-const {mongoose} = require('./db/mongoose');    // Same as => const mongoose = require('./db/mongoose').mongoose
-const {Todo} = require ('./models/todo');       // Same as => const Todo = require('./models/todo').Todo
-const {User} = require ('./models/user');       // Same as => const User = require('./models/user').User
-const {authenticate} = require('./middleware/authenticate');
+const { mongoose } = require('./db/mongoose');    // Same as => const mongoose = require('./db/mongoose').mongoose
+const { Todo } = require('./models/todo');       // Same as => const Todo = require('./models/todo').Todo
+const { User } = require('./models/user');       // Same as => const User = require('./models/user').User
+const { authenticate } = require('./middleware/authenticate');
 
 const app = express();
 const PORT = process.env.PORT;
 
-app.use(bodyParser.json());
+app.use(json());
 
 app.post('/todos', (req, res) => {
    var todo = new Todo({
@@ -81,13 +82,13 @@ app.delete('/todos/:id', (req, res) => {
 app.patch('/todos/:id', (req, res) => {
    const id = req.params.id;
 
-   var body = _.pick(req.body, ['text', 'completed']);
+   var body = pick(req.body, ['text', 'completed']);
    
    if (!ObjectID.isValid(id)) {
       return res.status(404).send();
    }
 
-   if (_.isBoolean(body.completed) && body.completed) {
+   if (isBoolean(body.completed) && body.completed) {
       body.completedAt = new Date().getTime();
    } else {
       body.completed = false;
@@ -109,7 +110,7 @@ app.patch('/todos/:id', (req, res) => {
 
 app.post('/users', (req, res) => {
 
-   var body = _.pick(req.body, ['email', 'password']);
+   var body = pick(req.body, ['email', 'password']);
    const user = new User(body);
 
   // User.findByToken        // User Model Method
@@ -120,7 +121,8 @@ app.post('/users', (req, res) => {
          return user.generateAuthToken();
       })
       .then((token) => {
-         res.header('x-auth', token).send(user);
+         res.header('x-auth', token)
+            .send(user);
       })
       .catch((e) => {
          res.status(400)
@@ -128,12 +130,48 @@ app.post('/users', (req, res) => {
       });
 });
 
-app.get('/users/me', authenticate,(req, res) => {
+app.get('/users/me', authenticate, (req, res) => {
    res.send(req.user);
 })
+
+app.post('/users/login', (req, res) => {
+
+   // ===***=== My Own Method ===***=== 
+   // const email = req.body.email;
+   // const password = req.body.password;
+   // User.findOne({email: email })
+   //    .then((user) => {
+   //       if (!user) return res.status(404).send('No user found');
+         
+   //       bcrypt.compare(password, user.password, (err, compRes) => {
+   //          if (!compRes || err) return res.status(404).send('Bad Password');
+
+   //          if (compRes) return res.json({user});
+   //       });
+
+   //    })
+   //    .catch((e) => res.status(404).send());
+
+   var body = _.pick(req.body, ['email', 'password']);
+
+   User.findByCredentials(body.email, body.password)
+      .then((user) => {
+         if(!user) return res.status(404).send('User not found')
+         // res.json({user})
+         return user.generateAuthToken()
+            .then((token) => {
+               res.header('x-auth', token)
+                  .send(user);
+            });
+      })
+      .catch((e) => {
+         res.status(400)
+            .send(e)
+      })
+});
 
 app.listen(PORT, () => {
    console.log(`Todo REST API Server Started in *${configENV}* environment on port ${PORT}.`);
 })
 
-module.exports = {app};
+module.exports = { app };
