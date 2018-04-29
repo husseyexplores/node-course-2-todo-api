@@ -321,6 +321,8 @@ describe('POST /users/login', () => {
                   expect(user.tokens[1]).toHaveProperty('access', 'auth');
                   expect(user.tokens[1]).toHaveProperty('token', res.header['x-auth']);
                   done();
+                  // Similar to Above
+                  // expect(user.toObject().tokens[1]).toMatchObject({access: 'auth', 'token': res.header['x-auth']})
                })
                .catch((e) => done(e));
             
